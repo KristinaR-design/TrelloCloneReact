@@ -17,7 +17,7 @@ const Header = () => {
         <div className="header">
             <div className="text">TrelloClone</div>
 
-            {/* Кнопка для переключения темы */}
+           
             <div className="buttonswitch">
                 <button className="theme-toggle" onClick={toggleTheme}>
                     {isDarkMod ? "Switch to Light Mode" : "Switch to Dark Mode"}

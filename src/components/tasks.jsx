@@ -1,177 +1,189 @@
 import React, { useEffect, useState } from "react";
-import '../css/Main.css'
-import { Popover } from 'react-tiny-popover'
+import "../css/Main.css";
+import "../css/Drag.css";
+import { Popover } from "react-tiny-popover";
 import deleteImg from "../assets/delete.png";
 import editImg from "../assets/change.png";
-import { addCard, deleteCard, setCards, editCard, reorderCards } from "../store/actions/cardActions";
+import {
+    addCard,
+    deleteCard,
+    setCards,
+    editCard,
+} from "../store/actions/cardActions";
 import { useDispatch, useSelector } from "react-redux";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { Droppable, Draggable } from "@hello-pangea/dnd";
 
 const Tasks = ({ currentTask }) => {
     const dispatch = useDispatch();
     const cards = useSelector((state) => state.card.cards);
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const [newTask, setNewTask] = useState({ title: "", completed: false });
+    const [newTask, setNewTask] = useState({ title: "" });
     const [isEditOpen, setIsEditOpen] = useState(null);
-
-    const filteredCards = cards
-        .filter(item => item.column_id === (currentTask ? currentTask.id : null))
-        .sort((a, b) => (a.order || 0) - (b.order || 0));
 
     useEffect(() => {
         dispatch(setCards());
-    }, [dispatch, currentTask]);
+    }, [dispatch]);
 
-    const addnewTask = () => {
-        const newCard = {
-            title: newTask.title,
-            column_id: currentTask.id,
-            desk_id: currentTask.board_id,
-            completed: false,
-            order: filteredCards.length
-        };
-        dispatch(addCard(newCard));
+    const filteredCards = cards
+        .filter((c) => String(c.column_id) === String(currentTask.id))
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+    const addNewTask = () => {
+        if (!newTask.title.trim()) return;
+
+        dispatch(
+            addCard({
+                title: newTask.title,
+                column_id: currentTask.id,
+                desk_id: currentTask.board_id,
+                completed: false,
+                order: filteredCards.length,
+            })
+        );
+
+        setNewTask({ title: "" });
         setIsPopoverOpen(false);
-        setNewTask({ title: "", completed: false });
     };
 
-    const handleChange = (e) => {
-        setNewTask({ ...newTask, [e.target.name]: e.target.value });
+    const toggleComplete = (item) => {
+        dispatch(editCard(item.id, { completed: !item.completed }));
     };
 
-    const swapCheck = (item) => {
-        dispatch(editCard(item.id, { ...item, completed: !item.completed }));
-    };
-
-    const deleteTask = (id) => {
-        dispatch(deleteCard(id));
-    };
-
-    const editTask = (id) => {
+    const applyEdit = (id) => {
         dispatch(editCard(id, { title: newTask.title }));
         setIsEditOpen(null);
-    };
-
-
-    const onDragEnd = (result) => {
-        const { source, destination } = result;
-        if (!destination) return;
-
-        const items = Array.from(filteredCards);
-        const [movedItem] = items.splice(source.index, 1);
-        items.splice(destination.index, 0, movedItem);
-
-        const updatedCards = items.map((card, index) => ({
-            ...card,
-            order: index
-        }));
-
-        dispatch(reorderCards(updatedCards));
+        setNewTask({ title: "" });
     };
 
     return (
-        <div className="main">
-            {currentTask ? (
-                <DragDropContext onDragEnd={onDragEnd}>
-                    <Droppable droppableId={`tasks-droppable-${currentTask.id}`} type="task">
-                        {(provided, snapshot) => (
-                            <div
-                                ref={provided.innerRef}
-                                {...provided.droppableProps}
-                                style={{
-                                    minHeight: '50px',
-                                    backgroundColor: snapshot.isDraggingOver ? '#f0f0f0' : 'transparent',
-                                    transition: 'background-color 0.2s ease',
-                                    padding: '8px'
-                                }}
-                            >
-                                {filteredCards.map((item, index) => (
-                                    <Draggable key={item.id} draggableId={item.id.toString()} index={index}>
-                                        {(provided, snapshot) => (
-                                            <div
-                                                className="newDesk"
-                                                ref={provided.innerRef}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                                style={{
-                                                    ...provided.draggableProps.style,
-                                                    opacity: snapshot.isDragging ? 0.8 : 1,
-                                                    cursor: 'grab',
-                                                    boxShadow: snapshot.isDragging ? '0 5px 10px rgba(0,0,0,0.2)' : 'none',
-                                                    marginBottom: '8px'
-                                                }}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    name="completed"
-                                                    checked={item.completed || false}
-                                                    onChange={() => swapCheck(item)}
-                                                />
-                                                <div className="newDiv">{item.title}</div>
+        <Droppable droppableId={`tasks-${currentTask.id}`} type="task">
+            {(provided, snapshot) => (
+                <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="task-list"
+                    style={{
+                        minHeight: 50,
+                        padding: 8,
+                        background: snapshot.isDraggingOver ? "#f4f5f7" : "transparent",
+                        transition: "0.2s",
+                    }}
+                >
+                    {filteredCards.map((item, index) => (
+                        <Draggable
+                            key={item.id}
+                            draggableId={item.id.toString()}
+                            index={index}
+                        >
+                            {(provided, snapshot) => (
+                                <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    className="newDesk"
+                                    style={{
+                                        ...provided.draggableProps.style,
+                                        opacity: snapshot.isDragging ? 0.85 : 1,
+                                        boxShadow: snapshot.isDragging
+                                            ? "0 8px 16px rgba(0,0,0,0.2)"
+                                            : "none",
+                                        marginBottom: 8,
+                                    }}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={item.completed}
+                                        onChange={() => toggleComplete(item)}
+                                    />
 
-                                                <Popover
-                                                    className="popover"
-                                                    isOpen={isEditOpen === item.id}
-                                                    positions={['right', 'top', 'bottom', 'left']}
-                                                    content={
-                                                        <div className="newDesk">
-                                                            <button className="x__button" onClick={() => setIsEditOpen(null)}> x </button>
-                                                            <div className="newDiv">Title:</div>
-                                                            <input
-                                                                className="newTitle"
-                                                                name="title"
-                                                                value={newTask.title}
-                                                                onChange={handleChange}
-                                                                type="text"
-                                                            />
-                                                            <button className="newButton" onClick={() => editTask(item.id)}>APPLY</button>
-                                                        </div>
-                                                    }
+                                    <div className="newDiv">{item.title}</div>
+
+                                    <Popover
+                                        isOpen={isEditOpen === item.id}
+                                        positions={["right", "top"]}
+                                        content={
+                                            <div className="newDesk">
+                                                <button
+                                                    className="x__button"
+                                                    onClick={() => setIsEditOpen(null)}
                                                 >
-                                                    <button className="delete-button" onClick={() => setIsEditOpen(item.id)}>
-                                                        <img src={editImg} alt="Edit" width="25" />
-                                                    </button>
-                                                </Popover>
-
-                                                <button className="delete-button" onClick={() => deleteTask(item.id)}>
-                                                    <img src={deleteImg} alt="Delete" width="25" />
+                                                    x
+                                                </button>
+                                                <input
+                                                    className="newTitle"
+                                                    value={newTask.title}
+                                                    onChange={(e) =>
+                                                        setNewTask({ title: e.target.value })
+                                                    }
+                                                />
+                                                <button
+                                                    className="newButton"
+                                                    onClick={() => applyEdit(item.id)}
+                                                >
+                                                    APPLY
                                                 </button>
                                             </div>
-                                        )}
-                                    </Draggable>
-                                ))}
-                                {provided.placeholder}
+                                        }
+                                    >
+                                        <button
+                                            className="delete-button"
+                                            onClick={() => {
+                                                setIsEditOpen(item.id);
+                                                setNewTask({ title: item.title });
+                                            }}
+                                        >
+                                            <img src={editImg} width="20" />
+                                        </button>
+                                    </Popover>
 
-                                <Popover
-                                    className="popover"
-                                    isOpen={isPopoverOpen}
-                                    positions={['right', 'top', 'bottom', 'left']}
-                                    content={
-                                        <div className="newDesk">
-                                            <button className="x__button" onClick={() => setIsPopoverOpen(false)}> x </button>
-                                            <div className="newDiv">Title:</div>
-                                            <input
-                                                className="newTitle"
-                                                name="title"
-                                                value={newTask.title}
-                                                onChange={handleChange}
-                                                type="text"
-                                            />
-                                            <button className="newButton" onClick={addnewTask}>ADD</button>
-                                        </div>
-                                    }
+                                    <button
+                                        className="delete-button"
+                                        onClick={() => dispatch(deleteCard(item.id))}
+                                    >
+                                        <img src={deleteImg} width="20" />
+                                    </button>
+                                </div>
+                            )}
+                        </Draggable>
+                    ))}
+
+                    {provided.placeholder}
+
+                    <Popover
+                        isOpen={isPopoverOpen}
+                        positions={["right", "top"]}
+                        content={
+                            <div className="newDesk">
+                                <button
+                                    className="x__button"
+                                    onClick={() => setIsPopoverOpen(false)}
                                 >
-                                    <button className="newButton" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>ADD</button>
-                                </Popover>
+                                    x
+                                </button>
+                                <input
+                                    className="newTitle"
+                                    value={newTask.title}
+                                    onChange={(e) =>
+                                        setNewTask({ title: e.target.value })
+                                    }
+                                />
+                                <button className="newButton" onClick={addNewTask}>
+                                    ADD
+                                </button>
                             </div>
-                        )}
-                    </Droppable>
-                </DragDropContext>
-            ) : (
-                <h2>No tasks yet</h2>
+                        }
+                    >
+                        <button
+                            className="newButton"
+                            onClick={() => setIsPopoverOpen(true)}
+                        >
+                            ADD
+                        </button>
+                    </Popover>
+                </div>
             )}
-        </div>
+        </Droppable>
     );
 };
 

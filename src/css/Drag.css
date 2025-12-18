@@ -1,74 +1,139 @@
-.your-class li {
-    transition: all 0.2s ease;
-}
-
-.your-class li:active {
-    background-color: #e0e0e0;
-    transform: scale(0.98);
-}
-
-.dragging {
-    background-color: #f0f8ff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    transform: scale(1.02);
-    transition: all 0.2s ease;
-}
-
-/* Tasks.css */
 
 .task-list {
-    min-height: 50px;
-    padding: 10px;
-    background-color: #f5f5f5;
-    border-radius: 12px;
-    transition: background-color 0.2s ease;
-  }
-  
-  .task-list:hover {
-    background-color: #eaeaea;
-  }
-  
-  .task-card {
-    background-color: #ffffff;
-    border: 1px solid #dcdcdc;
-    border-radius: 10px;
-    padding: 10px 12px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .task-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  .task-content {
-    flex-grow: 1;
-    font-size: 14px;
-    color: #333;
-    padding-right: 10px;
-  }
-  
-  .task-actions button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    margin-left: 4px;
-    transition: opacity 0.2s ease;
-  }
-  
-  .task-actions button:hover {
-    opacity: 0.7;
-  }
-  
-  .task-actions img {
-    width: 18px;
-    height: 18px;
-  }
-  
+  min-height: 50px;
+  padding: 10px 6px 4px;
+  background-color: transparent;
+  border-radius: var(--radius-md);
+  transition:
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+  flex-grow: 1;
+}
+
+.task-list:hover {
+  background-color: rgba(15, 23, 42, 0.26);
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.85);
+}
+
+.task-card {
+  background-color: var(--bg-card);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.75);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.2s ease,
+    border-color 0.18s ease,
+    background-color 0.18s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: grab;
+  user-select: none; 
+}
+
+.task-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.95);
+  border-color: rgba(129, 140, 248, 0.9);
+}
+
+.task-card:active {
+  cursor: grabbing;
+}
+
+.task-card.dragging {
+  background-color: var(--bg-card-drag);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.95);
+  border-radius: var(--radius-md);
+  transform: translateY(-2px) scale(1.02) rotate(4deg); 
+  opacity: 0.94;
+  transition: all 0.18s ease;
+  z-index: 1000;
+  cursor: grabbing;
+}
+
+.task-content {
+  flex-grow: 1;
+  font-size: 14px;
+  color: var(--text-primary);
+  padding-right: 10px;
+}
+
+.task-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 4px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  opacity: 0.7;
+}
+
+.task-actions button:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.task-actions img {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1); 
+}
+
+.task-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--card-bg);
+  transition: box-shadow 0.2s ease;
+  transform: none !important;
+}
+
+.task-card.dragging {
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.task-title {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.task-wrapper {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.task-actions-overlay {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.task-wrapper:hover .task-actions-overlay {
+  opacity: 1;
+}
+
+.task-card.dragging ~ .task-actions-overlay {
+  display: none;
+}
