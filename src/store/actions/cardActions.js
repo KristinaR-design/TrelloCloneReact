@@ -5,7 +5,7 @@ export const DELETE_CARD = "DELETE_CARD";
 export const REORDER_CARDS = "REORDER_CARDS";
 
 export const addCard = (newCard) => async (dispatch) => {
-    const response = await fetch("https://67e5229718194932a584b0b0.mockapi.io/task", {
+    const response = await fetch("https://6943f6c87dd335f4c35ec3c7.mockapi.io/task", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -25,7 +25,7 @@ export const addCard = (newCard) => async (dispatch) => {
 }
 
 export const deleteCard = (id) => async (dispatch) => {
-    const response = await fetch(`${"https://67e5229718194932a584b0b0.mockapi.io/task"}/${id}`, {
+    const response = await fetch(`${"https://6943f6c87dd335f4c35ec3c7.mockapi.io/task"}/${id}`, {
         method: "DELETE",
     });
 
@@ -40,7 +40,7 @@ export const deleteCard = (id) => async (dispatch) => {
 };
 
 export const setCards = () => async (dispatch) => {
-    const response = await fetch("https://67e5229718194932a584b0b0.mockapi.io/task");
+    const response = await fetch("https://6943f6c87dd335f4c35ec3c7.mockapi.io/task");
     const data = await response.json();
 
     dispatch({
@@ -50,7 +50,7 @@ export const setCards = () => async (dispatch) => {
 };
 
 export const editCard = (id, updatedCard) => async (dispatch) => {
-    const response = await fetch(`${"https://67e5229718194932a584b0b0.mockapi.io/task"}/${id}`, {
+    const response = await fetch(`${"https://6943f6c87dd335f4c35ec3c7.mockapi.io/task"}/${id}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
@@ -77,7 +77,7 @@ export const reorderCards = (reorderedCards) => async (dispatch) => {
   try {
     // Update each card in the API
     for (const card of reorderedCards) {
-      const response = await fetch(`${"https://67e5229718194932a584b0b0.mockapi.io/task"}/${card.id}`, {
+      const response = await fetch(`${"https://6943f6c87dd335f4c35ec3c7.mockapi.io/task"}/${card.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -95,17 +95,17 @@ export const reorderCards = (reorderedCards) => async (dispatch) => {
       }
     }
 
-    // Update local state
+   
     dispatch({
       type: REORDER_CARDS,
       payload: reorderedCards,
     });
 
-    // Refresh cards from API to ensure consistency
+
     dispatch(setCards());
   } catch (error) {
     console.error("Failed to reorder cards:", error);
-    // Refresh cards from API to ensure consistency
+
     dispatch(setCards());
   }
 };

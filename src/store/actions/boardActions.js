@@ -11,7 +11,7 @@ export const addBoard = (newBoard) => async (dispatch) => {
         user_id: userId,
     };
 
-    const response = await fetch("https://67e2ae0997fc65f535372377.mockapi.io/api/trello/boards", {
+    const response = await fetch("https://67ebb2deaa794fb3222b4541.mockapi.io/login/v1/boards", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -31,7 +31,7 @@ export const addBoard = (newBoard) => async (dispatch) => {
 };
 
 export const deleteBoard = (id) => async (dispatch) => {
-    const response = await fetch(`https://67e2ae0997fc65f535372377.mockapi.io/api/trello/boards/${id}`, {
+    const response = await fetch(`https://67ebb2deaa794fb3222b4541.mockapi.io/login/v1/boards/${id}`, {
         method: "DELETE",
     });
 
@@ -47,7 +47,7 @@ export const deleteBoard = (id) => async (dispatch) => {
 
 
 export const setBoards = () => async (dispatch) => {
-    const response = await fetch("https://67e2ae0997fc65f535372377.mockapi.io/api/trello/boards");
+    const response = await fetch("https://67ebb2deaa794fb3222b4541.mockapi.io/login/v1/boards");
     const data = await response.json();
 
     const userId = localStorage.getItem("user_id");
@@ -62,7 +62,7 @@ export const setBoards = () => async (dispatch) => {
 
 
 export const editBoards = (id, updatedBoard) => async (dispatch) => {
-    const response = await fetch(`https://67e2ae0997fc65f535372377.mockapi.io/api/trello/boards/${id}`, {
+    const response = await fetch(`https://67ebb2deaa794fb3222b4541.mockapi.io/login/v1/boards/${id}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",

@@ -5,7 +5,7 @@ export const EDIT_COLUMN = "EDIT_COLUMN";
 export const REORDER_COLUMNS = "REORDER_COLUMNS";
 
 export const addColumn = (title, boardId) => async (dispatch) => {
-  const response = await fetch("https://67e2ae0997fc65f535372377.mockapi.io/api/trello/colums", {
+  const response = await fetch("https://6943f6c87dd335f4c35ec3c7.mockapi.io/colums", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -26,7 +26,7 @@ export const addColumn = (title, boardId) => async (dispatch) => {
 
 
 export const deleteColumn = (id) => async (dispatch) => {
-  const response = await fetch(`${"https://67e2ae0997fc65f535372377.mockapi.io/api/trello/colums"}/${id}`, {
+  const response = await fetch(`${"https://6943f6c87dd335f4c35ec3c7.mockapi.io/colums"}/${id}`, {
       method: "DELETE",
   });
 
@@ -42,7 +42,7 @@ export const deleteColumn = (id) => async (dispatch) => {
 
 export const setColumns = (boardId) => async (dispatch) => {
   try {
-    const response = await fetch("https://67e2ae0997fc65f535372377.mockapi.io/api/trello/colums");
+    const response = await fetch("https://6943f6c87dd335f4c35ec3c7.mockapi.io/colums");
     if (!response.ok) throw new Error(`Error ${response.status}`);
     const data = await response.json();
     
@@ -57,7 +57,7 @@ export const setColumns = (boardId) => async (dispatch) => {
 
 
 export const editColumn = (id, updatedColumn) => async (dispatch) => {
-  const response = await fetch(`${"https://67e2ae0997fc65f535372377.mockapi.io/api/trello/colums"}/${id}`, {
+  const response = await fetch(`${"https://6943f6c87dd335f4c35ec3c7.mockapi.io/colums"}/${id}`, {
       method: "PUT",
       headers: {
           "Content-Type": "application/json",
@@ -89,7 +89,7 @@ export const reorderColumns = (reorderedColumns) => async (dispatch) => {
     // Update each column's order in the API
     for (let i = 0; i < reorderedColumns.length; i++) {
       const column = reorderedColumns[i];
-      await fetch(`${"https://67e2ae0997fc65f535372377.mockapi.io/api/trello/colums"}/${column.id}`, {
+      await fetch(`${"https://6943f6c87dd335f4c35ec3c7.mockapi.io/colums"}/${column.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

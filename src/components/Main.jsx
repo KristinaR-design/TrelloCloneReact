@@ -19,10 +19,10 @@ const Main = ({ activeBoard }) => {
   const [isEditOpen, setIsEditOpen] = useState(null);
 
   useEffect(() => {
-    if (activeBoard && activeBoard.id) {
+    if (activeBoard?.id) {
       dispatch(setColumns(activeBoard.id));
     }
-  }, [activeBoard, dispatch])
+  }, [activeBoard, dispatch]);
 
   const handleAddColumn = () => {
     if (!newColumn.title.trim()) return;
@@ -44,78 +44,49 @@ const Main = ({ activeBoard }) => {
 
   const onDragEnd = (result) => {
     const { source, destination, type, draggableId } = result;
-    
     if (!destination) return;
 
-    if (type === 'column') {
+    if (type === "column") {
       if (source.index === destination.index) return;
 
-      const filteredColumns = columns
-        .filter((item) => activeBoard ? item.boardId === activeBoard.id : false)
+      const boardColumns = columns
+        .filter(col => col.boardId === activeBoard.id)
         .sort((a, b) => (a.order || 0) - (b.order || 0));
-      
-      const reordered = Array.from(filteredColumns);
+
+      const reordered = Array.from(boardColumns);
       const [moved] = reordered.splice(source.index, 1);
       reordered.splice(destination.index, 0, moved);
-      
-      const columnsWithOrder = reordered.map((col, index) => ({
-        ...col,
-        order: index
-      }));
-      
-      dispatch(reorderColumns(columnsWithOrder));
-    }
-    else if (type === 'task') {
-      const sourceColumnId = source.droppableId.split('-')[2];
-      const destinationColumnId = destination.droppableId.split('-')[2];
-      const movedCard = cards.find(card => card.id.toString() === draggableId);
 
+      const updatedColumns = reordered.map((col, index) => ({ ...col, order: index }));
+      dispatch(reorderColumns(updatedColumns));
+    }
+
+    if (type === "task") {
+      const sourceColumnId = source.droppableId.split("-")[2];
+      const destinationColumnId = destination.droppableId.split("-")[2];
+
+      const movedCard = cards.find(c => c.id.toString() === draggableId);
       if (!movedCard) return;
 
-      const sourceColumnCards = cards
-        .filter(card => card.column_id === sourceColumnId)
-        .sort((a, b) => (a.order || 0) - (b.order || 0));
-      
-      const destinationColumnCards = cards
-        .filter(card => card.column_id === destinationColumnId)
+      const sourceCards = cards
+        .filter(c => c.column_id === sourceColumnId)
         .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-      const sourceIndex = sourceColumnCards.findIndex(card => card.id.toString() === draggableId);
-      if (sourceIndex !== -1) {
-        sourceColumnCards.splice(sourceIndex, 1);
-      }
+      const destCards = cards
+        .filter(c => c.column_id === destinationColumnId)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-      if (sourceColumnId === destinationColumnId) {
-        sourceColumnCards.splice(destination.index, 0, movedCard);
-        
-        const updatedCards = sourceColumnCards.map((card, index) => ({
-          ...card,
-          order: index
-        }));
+      const sourceIndex = sourceCards.findIndex(c => c.id.toString() === draggableId);
+      if (sourceIndex !== -1) sourceCards.splice(sourceIndex, 1);
 
-        dispatch(reorderCards(updatedCards));
-      } else {
-        const updatedCard = {
-          ...movedCard,
-          column_id: destinationColumnId,
-          desk_id: activeBoard.id
-        };
-        
-        destinationColumnCards.splice(destination.index, 0, updatedCard);
-        
-        const updatedSourceCards = sourceColumnCards.map((card, index) => ({
-          ...card,
-          order: index
-        }));
-        
-        const updatedDestinationCards = destinationColumnCards.map((card, index) => ({
-          ...card,
-          order: index
-        }));
+      const updatedMovedCard = { ...movedCard, column_id: destinationColumnId, desk_id: activeBoard.id };
+      destCards.splice(destination.index, 0, updatedMovedCard);
 
-        const allUpdatedCards = [...updatedSourceCards, ...updatedDestinationCards];
-        dispatch(reorderCards(allUpdatedCards));
-      }
+      const updatedSourceCards = sourceCards.map((c, i) => ({ ...c, order: i }));
+      const updatedDestCards = destCards.map((c, i) => ({ ...c, order: i }));
+
+      const allUpdatedCards = [...updatedSourceCards, ...updatedDestCards];
+      dispatch(reorderCards(allUpdatedCards));
     }
   };
 
@@ -127,63 +98,44 @@ const Main = ({ activeBoard }) => {
             {(provided) => (
               <div className="columns" ref={provided.innerRef} {...provided.droppableProps}>
                 {columns
-                  .filter((item) => activeBoard ? item.boardId === activeBoard.id : false)
+                  .filter(col => col.boardId === activeBoard.id)
                   .sort((a, b) => (a.order || 0) - (b.order || 0))
-                  .map((columnById, index) => (
-                    <Draggable key={columnById.id} draggableId={columnById.id.toString()} index={index}>
+                  .map((column, index) => (
+                    <Draggable key={column.id} draggableId={column.id.toString()} index={index}>
                       {(provided) => (
                         <div
                           className="column"
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          {...provided.dragHandleProps}
                         >
-                          <div className="column-title">{columnById.title}</div>
-                          <Tasks currentTask={columnById} />
+                          <div className="column-title" {...provided.dragHandleProps}>
+                            {column.title}
+                          </div>
+
+                          <Tasks currentTask={column} />
 
                           <div className="task-buttons">
                             <Popover
-                              className="popover"
-                              isOpen={isEditOpen === columnById.id}
+                              isOpen={isEditOpen === column.id}
                               positions={["bottom", "right", "top", "left"]}
                               content={
                                 <div className="newDesk">
-                                  <button
-                                    className="x__button"
-                                    onClick={() => setIsEditOpen(null)}
-                                  >
-                                    x
-                                  </button>
+                                  <button className="x__button" onClick={() => setIsEditOpen(null)}>x</button>
                                   <input
                                     className="newTitle"
-                                    name="title"
                                     value={newColumn.title}
-                                    onChange={(e) =>
-                                      setNewColumn({ title: e.target.value })
-                                    }
-                                    type="text"
+                                    onChange={(e) => setNewColumn({ title: e.target.value })}
                                   />
-                                  <button
-                                    className="newButton"
-                                    onClick={() => handleEditColumn(columnById.id)}
-                                  >
-                                    APPLY
-                                  </button>
+                                  <button className="newButton" onClick={() => handleEditColumn(column.id)}>APPLY</button>
                                 </div>
                               }
                             >
-                              <button
-                                className="edit-button"
-                                onClick={() => setIsEditOpen(columnById.id)}
-                              >
+                              <button onClick={() => setIsEditOpen(column.id)}>
                                 <img src={editImg} alt="Edit" width="25" />
                               </button>
                             </Popover>
 
-                            <button
-                              className="delete-button"
-                              onClick={() => handleDeleteColumn(columnById.id)}
-                            >
+                            <button onClick={() => handleDeleteColumn(column.id)}>
                               <img src={deleteImg} alt="Delete" width="25" />
                             </button>
                           </div>
@@ -195,34 +147,21 @@ const Main = ({ activeBoard }) => {
 
                 <div className="add-column-container">
                   <Popover
-                    className="popover"
                     isOpen={isPopoverOpen}
                     positions={["bottom", "right", "top", "left"]}
                     content={
                       <div className="newDesk">
-                        <button
-                          className="x__button"
-                          onClick={() => setIsPopoverOpen(false)}
-                        >
-                          x
-                        </button>
-                        <div className="div__title">Title:</div>
+                        <button className="x__button" onClick={() => setIsPopoverOpen(false)}>x</button>
                         <input
                           className="newTitle"
-                          name="title"
                           value={newColumn.title}
                           onChange={(e) => setNewColumn({ title: e.target.value })}
-                          type="text"
                         />
-                        <button className="newButton" onClick={handleAddColumn}>
-                          ADD
-                        </button>
+                        <button className="newButton" onClick={handleAddColumn}>ADD</button>
                       </div>
                     }
                   >
-                    <button
-                      className="newButton add-column-button"
-                      onClick={() => setIsPopoverOpen(true)}>
+                    <button className="newButton add-column-button" onClick={() => setIsPopoverOpen(true)}>
                       ADD COLUMN
                     </button>
                   </Popover>
